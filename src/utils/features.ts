@@ -92,17 +92,17 @@ export const getInventories = async (
     return inventory
 }
 
-interface MyDocument extends Document {
+interface MyDocument  {
     createdAt: Date,
     discount?: number,
     total?: number
-    property?:string
+   
 }
 type FuncProps = {
     length: number,
     docArr: MyDocument[],
     today?: Date
-    property?: string
+    property?: "discount" | "total"
 }
 export const getChartData = ({ length, docArr, property }: FuncProps) => {
     const today = new Date()
