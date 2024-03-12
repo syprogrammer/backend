@@ -9,7 +9,7 @@ const userRouter = express.Router()
 
 userRouter.post("/new",newUser)
 userRouter.get("/allUsers",adminOnly,getAllUsers)
-userRouter.get("/userDetails/:id",adminOnly,getUser)
+userRouter.get("/userDetails/:id",getUser)
 userRouter.put("/changeUserRole/:id",adminOnly,changeUserRole)
 userRouter.delete("/deleteUser/:id",adminOnly,deleteUser)
 
