@@ -3,6 +3,7 @@ import { User } from "../models/user.models.js"
 import { NewUserRequestBody } from "../types/types.js"
 import { asyncErrorHandler } from "../middleware/error.middleware.js"
 import ErrorHandler from "../utils/errorHandler.js"
+import mongoose from "mongoose"
 
 export const newUser = asyncErrorHandler(
     async (
@@ -24,12 +25,12 @@ export const newUser = asyncErrorHandler(
                 })
         }
 
-        if (!_id || !name || !email || !photo || !gender || !dob) {
+        if (!name || !email || !photo || !gender || !dob) {
             return next(new ErrorHandler("please add all fields", 400))
         }
 
         const newUser = await User.create({
-            name, email, photo, gender, _id, dob
+            name, email, photo, gender, dob
         })
         return res.status(200)
             .json({
@@ -40,28 +41,28 @@ export const newUser = asyncErrorHandler(
     }
 )
 export const changeUserRole = asyncErrorHandler(async (req, res, next) => {
-        const id = req.params.id
+    const id = req.params.id
 
-        if(!id){
-            return next (new ErrorHandler("Invalid request",400))
-        }
-       
-        const user = await User.findById(id)
-        if(!user){
-            return next(new ErrorHandler("No user found by this id",404))
-        }
-        if(user.role=="admin"){
-            user.role = "user"
-        }else{
-            user.role = "admin"
-        }
-        
-        await user.save()
-      
-        return res.status(200).json({
-            success:true,
-            message:"Successfully changed user previlege"
-        })
+    if (!id) {
+        return next(new ErrorHandler("Invalid request", 400))
+    }
+
+    const user = await User.findById(id)
+    if (!user) {
+        return next(new ErrorHandler("No user found by this id", 404))
+    }
+    if (user.role == "admin") {
+        user.role = "user"
+    } else {
+        user.role = "admin"
+    }
+
+    await user.save()
+
+    return res.status(200).json({
+        success: true,
+        message: "Successfully changed user previlege"
+    })
 
 })
 
@@ -73,7 +74,22 @@ export const getAllUsers = asyncErrorHandler(async (req, res, next) => {
 
 export const getUser = asyncErrorHandler(async (req, res, next) => {
     const id = req.params.id
-    const user = await User.findById(id)
+    // const user = await User.findById(id).populate("wishlist").populate({
+    //     path: 'wishlist.items', // Populate the products field within wishlist
+    //     model: 'Product', // Specify the model for products
+
+    // })
+
+    const user = await User.aggregate([
+        {
+            $lookup: {
+                from: "products",
+                localField: "wishlist",
+                foreignField: "_id",
+                as: "wishlist",
+            }
+        }
+    ])
     if (!user) { return next(new ErrorHandler("Invalid Id", 400)) }
     return res.status(200).json({ success: true, user })
 })

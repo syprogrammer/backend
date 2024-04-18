@@ -10,17 +10,11 @@ interface IUser extends Document {
     email: string,
     role: "admin" | "user"
     gender: "male" | "female"
-    dob: Date
     createdAt: Date
     updatedAt: Date
-    age: number //virtual
 }
 
 const userSchema = new Schema({
-    _id: {
-        type: String,
-        required: [true, "Please send valid id"]
-    },
 
     name: {
         type: String,
@@ -34,7 +28,7 @@ const userSchema = new Schema({
     },
     photo: {
         type: String,
-        required: [true, "Please enter photo"]
+
     },
     role: {
         type: String,
@@ -44,32 +38,28 @@ const userSchema = new Schema({
     gender: {
         type: String,
         enum: ["male", "female"],
-        required: [true, "Please enter Gender"]
+
     },
-    dob: {
-        type: Date,
-        required: [true, "Please enter date of birth"]
-    },
+    wishlist: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Product"
+        }
+    ],
+    
+    cart:[
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Product"
+        }
+    ],
+    
 
 },
     {
         timestamps: true,
     })
 
-userSchema.virtual("age").get(
-    function () {
-        const today = new Date();
-        const dob = this.dob
-        let age = today.getFullYear() - dob.getFullYear();
-        if (today.getMonth() < dob.getMonth()
-            ||
-            today.getMonth() === dob.getMonth()
-            &&
-            today.getDate() < dob.getDate()) {
-            age -= 1
-        }
-        return age
-    }
-)
+
 
 export const User = mongoose.model<IUser>("User", userSchema)
